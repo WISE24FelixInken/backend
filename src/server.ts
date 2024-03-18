@@ -145,7 +145,6 @@ app.delete('/v1/events/deleteEvent', async (req: Request, res: Response) => {
     }
 });
 
-// TODO: Derzeit nur Approve möglich - Disapprove noch implementieren oder alternativ bewusst sagen was akzeptiert wurde bleibt akzeptiert
 app.patch('/v1/events/approveEvent', async (req: Request, res: Response) => {
 try {
         if (req.query.id === undefined) {
@@ -179,7 +178,7 @@ app.put('/v1/events/editEvent', async (req: Request, res: Response) => {
     }
 });
 
-app.post('v1/events/addHighlite', async (req: Request, res: Response) => {
+app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
     try {
         if (req.body === undefined) {
             res.status(400).json({ error: 'No Data provided' });
