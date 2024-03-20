@@ -2,8 +2,7 @@ import {EventCustom} from "./SimulateDB/EventInterface";
 import * as fs from 'fs';
 import {eventList} from "./SimulateDB/EventData";
 import uuid4 from "uuid4";
-import exp from "node:constants";
-import {throws} from "node:assert";
+
 export async function addEvent(event: EventCustom){
     if (validateEvent(event)){
         const entryToAdd =  {
@@ -26,7 +25,6 @@ export async function addEvent(event: EventCustom){
     }
     return ('Object dose not match the required structure. Please check the documentation.');
 }
-
 export async function approveEvent(eventId: string){
     const eventToApprove = eventList.unapprovedEvents.find(event => event.entry.eventId === eventId);
     if (eventToApprove !== undefined){
@@ -36,7 +34,6 @@ export async function approveEvent(eventId: string){
     }
     return ('Event not found');
 }
-
 export async function addHighlight(highliteData: any ){
     if (validateHighlight(highliteData)){
     const event = eventList.approvedEvents.find(event => event.entry.eventId === highliteData.eventId);
@@ -55,6 +52,48 @@ export async function addHighlight(highliteData: any ){
     }
     return ('Event not found');
     }
+}
+export async function editEvent(event: EventCustom){
+    if (validateToEditEvent(event)){
+        let eventToEdit
+        let message = 'Event not found';
+        if(eventList.approvedEvents.find(eventToEdit => eventToEdit.entry.eventId === event.entry.eventId)!== undefined){
+            eventToEdit = eventList.approvedEvents.find(eventToEdit => eventToEdit.entry.eventId === event.entry.eventId);
+            console.log('approved', eventToEdit);
+        }
+        if(eventList.unapprovedEvents.find(eventToEdit => eventToEdit.entry.eventId === event.entry.eventId)!== undefined){
+            eventToEdit = eventList.unapprovedEvents.find(eventToEdit => eventToEdit.entry.eventId === event.entry.eventId);
+            console.log('unapproved', eventToEdit);
+        }
+        if (eventToEdit !== undefined){
+            message ='No changes made to the event. Please check the documentation.';
+            if (event.entry.title !== null && event.entry.title !== undefined){
+                eventToEdit.entry.title = event.entry.title;
+                message = 'Event edited';
+            }
+            if (event.entry.beschreibung !== null && event.entry.beschreibung !== undefined){
+                eventToEdit.entry.beschreibung = event.entry.beschreibung;
+                message = 'Event edited';
+            }
+            if (event.entry.location !== null && event.entry.location){
+                eventToEdit.entry.location = event.entry.location;
+                message = 'Event edited';
+            }
+            if (event.entry.date !== null && event.entry.price !== undefined) {
+                eventToEdit.entry.date = event.entry.date;
+                message = 'Event edited';
+            }
+            if (event.entry.price !== null && event.entry.price !== undefined) {
+                eventToEdit.entry.price = event.entry.price;
+                message = 'Event edited';
+            }
+        }
+        return (message);
+    }
+}
+//ToDo implement
+function validateToEditEvent(event: EventCustom){
+    return true
 }
 function validateEvent(event: EventCustom){
     const sendedKeys = Object.keys(event);
@@ -110,7 +149,7 @@ function validateEvent(event: EventCustom){
         }
     }
 }
-
+//ToDo implement
 function validateHighlight(highliteData: any){
     return true;
 }

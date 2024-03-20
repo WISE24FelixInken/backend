@@ -7,9 +7,10 @@ import {
     searchEventApproved,
     searchEventUnapproved
 } from "./loadData";
-import {addEvent,
-        approveEvent,
-        addHighlight
+import {
+    addEvent,
+    approveEvent,
+    addHighlight, editEvent
 } from "./storeData";
 import {deleteEvent} from "./deleteEvent";
 import cors from "cors";
@@ -44,7 +45,6 @@ app.get('/v1/events/approved', async (req: Request, res: Response) => {
         console.error('Fehler beim Laden und Verarbeiten der Daten:', error);
     }
 });
-
 app.get('/v1/events/unapproved', async (req: Request, res: Response) => {
     try {
         const response = await getUnapprovedEvents();
@@ -60,7 +60,6 @@ app.get('/v1/events/unapproved', async (req: Request, res: Response) => {
         console.error('Fehler beim Laden und Verarbeiten der Daten:', error);
     }
 });
-
 app.get('/v1/events/loadEvent', async (req: Request, res: Response) => {
     try {
         const response = await getSpecificEvent(req.query.id as string);
@@ -80,7 +79,6 @@ app.get('/v1/events/loadEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.post('/v1/events/addNewEvent', async (req: Request, res: Response) => {
     try{
     const response = await addEvent(req.body);
@@ -96,7 +94,6 @@ app.post('/v1/events/addNewEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.get('/v1/events/searchEvent', async (req: Request, res: Response) => {
     try {
         if (req.query.searchKey === undefined) {
@@ -125,7 +122,6 @@ app.get('/v1/events/searchEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.delete('/v1/events/deleteEvent', async (req: Request, res: Response) => {
     try {
         if (req.query.id === undefined) {
@@ -146,7 +142,6 @@ app.delete('/v1/events/deleteEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.patch('/v1/events/approveEvent', async (req: Request, res: Response) => {
 try {
         if (req.query.id === undefined) {
@@ -166,20 +161,28 @@ try {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-// ToDo: Implementieren der Funktion
 app.put('/v1/events/editEvent', async (req: Request, res: Response) => {
     try {
         if (req.body === undefined) {
-            res.status(400).json({ error: 'No id provided' });
+            res.status(400).json({ error: 'No Data provided' });
             return;
         }
-    }catch{
+        const response = await editEvent(req.body);
+        let statusCode : number;
+        if (response === 'No changes made to the event. Please check the documentation.'){
+            statusCode = 400;
+        } else if (response === 'Event not found') {
+            console.log(response);
+            statusCode = 204;
+        }else {
+            statusCode = 200;
+        }
+            res.status(statusCode).json(response);
+    }catch(error){
         // Statuscode 500, wenn ein Fehler aufgetreten ist
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
     try {
         if (req.body === undefined) {
