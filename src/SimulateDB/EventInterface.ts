@@ -7,6 +7,7 @@ export interface EventCustom {
         beschreibung: string;
         location: string;
         date: string;
+        time?: string;
         eventId: string;
         price: number;
         numberOfHighlights: number;

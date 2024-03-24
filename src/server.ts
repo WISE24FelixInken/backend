@@ -12,8 +12,9 @@ import {
     approveEvent,
     addHighlight, editEvent
 } from "./storeData";
-import {deleteEvent} from "./deleteEvent";
+import {deleteEvent, deleteHighlight} from "./deleteEvent";
 import cors from "cors";
+import {startUp} from "./SimulateDB/EventData";
 
 dotenv.config();
 
@@ -22,10 +23,6 @@ const port = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(cors());
-
-app.get('/', (req: Request, res : Response)  => {
-    res.send('Express + Typescript ');
-});
 
 app.listen(port, ()=>{
     console.log(`[server]: Server is running at http://localhost:${port} Server My Server is running on port ${port}!`);
@@ -86,7 +83,7 @@ app.post('/v1/events/addNewEvent', async (req: Request, res: Response) => {
     if (response === 'Object dose not match the required structure. Please check the documentation.') {
         statusCode = 400;
     }else{
-        statusCode = 200;
+        statusCode = 201;
     }
     res.status(statusCode).json(response);
     }catch (error){
@@ -151,7 +148,7 @@ try {
         const response = await approveEvent(req.query.id as string);
         let statusCode : number;
         if (response === 'Event not found') {
-            statusCode = 204;
+            statusCode = 404;
         } else {
             statusCode = 200;
         }
@@ -192,6 +189,26 @@ app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
         const response = await addHighlight(req.body);
         let statusCode : number;
         if (response === 'Event not found') {
+            statusCode = 404;
+        } else {
+            statusCode = 201;
+        }
+        res.status(statusCode).json(response);
+    }catch{
+        // Statuscode 500, wenn ein Fehler aufgetreten ist
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.delete('/v1/events/deleteHighlight', async (req: Request, res: Response) => {
+    console.log('deleteHighlight');
+    try {
+        if (req.query.id === undefined) {
+            res.status(400).json({ error: 'No id provided' });
+            return;
+        }
+        const response = await deleteHighlight(req.query.id as string, req.query.highlightId as string);
+        let statusCode : number;
+        if (response === 'No event found' || response === 'No highlight found') {
             statusCode = 204;
         } else {
             statusCode = 200;
@@ -201,4 +218,9 @@ app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
         // Statuscode 500, wenn ein Fehler aufgetreten ist
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+app.post('/v1/startup', async (req: Request, res: Response) => {
+    const response = await startUp();
+    res.status(200).json({ message: 'Server is filled with example Data' });
 });

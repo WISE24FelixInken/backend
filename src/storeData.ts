@@ -1,4 +1,4 @@
-import {EventCustom} from "./SimulateDB/EventInterface";
+import {EventCustom, EventList} from "./SimulateDB/EventInterface";
 import * as fs from 'fs';
 import {eventList} from "./SimulateDB/EventData";
 import uuid4 from "uuid4";
@@ -153,3 +153,4 @@ function validateEvent(event: EventCustom){
 function validateHighlight(highliteData: any){
     return true;
 }
+

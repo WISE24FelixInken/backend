@@ -1,8 +1,8 @@
-import * as fs from 'fs/promises';
-import {throws} from "node:assert";
 
-import {eventList} from "./SimulateDB/EventData";
 import {EventCustom} from "./SimulateDB/EventInterface";
+import {eventList} from "./SimulateDB/EventData";
+
+
 export async function getApprovedEvents() {
         return  eventList.approvedEvents.sort((a, b) => b.createdOn - a.createdOn);
 }
