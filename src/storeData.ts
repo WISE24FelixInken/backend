@@ -21,16 +21,22 @@ export async function addEvent(event: EventCustom){
             entry: entryToAdd
         }
         eventList.unapprovedEvents.push(eventToAdd);
+        doAudit(event.createdBy, 'added event to unapproved events.', entryToAdd.eventId);
         return ('Event added to unapproved events.')
     }
     return ('Object dose not match the required structure. Please check the documentation.');
 }
 export async function approveEvent(eventId: string){
-    const eventToApprove = eventList.unapprovedEvents.find(event => event.entry.eventId === eventId);
+    let eventToApprove = eventList.unapprovedEvents.find(event => event.entry.eventId === eventId);
     if (eventToApprove !== undefined){
         eventList.approvedEvents.push(eventToApprove);
         eventList.unapprovedEvents = eventList.unapprovedEvents.filter(event => event.entry.eventId !== eventId);
+        doAudit("System", 'approved', eventId);
         return ('Event approved');
+    }
+    eventToApprove = eventList.approvedEvents.find(event => event.entry.eventId === eventId);
+    if (eventToApprove !== undefined){
+        return ('Event already approved');
     }
     return ('Event not found');
 }
@@ -48,6 +54,7 @@ export async function addHighlight(highliteData: any ){
             event.entry.highlight = [];
         }
         event.entry.highlight.push(highlight);
+        doAudit("System", 'added highlight', event.entry.eventId);
         return ('Highlight added');
     }
     return ('Event not found');
@@ -87,7 +94,9 @@ export async function editEvent(event: EventCustom){
                 eventToEdit.entry.price = event.entry.price;
                 message = 'Event edited';
             }
+            doAudit(event.createdBy, 'edited', event.entry.eventId);
         }
+
         return (message);
     }
 }
@@ -152,5 +161,12 @@ function validateEvent(event: EventCustom){
 //ToDo implement
 function validateHighlight(highliteData: any){
     return true;
+}
+
+async function doAudit(createdBy: string, action: string, eventId: string) {
+    let text = 'Nutzer: ' +  createdBy + ' hat folgende Aktionen durchgeführt: ' + action + ' am ' + Date.now() + ' mit dem Event '+ eventId +'\n';
+    fs.appendFile('src/SimulateDB/audit.txt', text, (error) => {
+        if (error) throw error;
+    });
 }
 

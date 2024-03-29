@@ -149,7 +149,9 @@ try {
         let statusCode : number;
         if (response === 'Event not found') {
             statusCode = 404;
-        } else {
+        } else if(response === 'Event already approved'){
+            statusCode = 409;
+        }else {
             statusCode = 200;
         }
         res.status(statusCode).json(response);
