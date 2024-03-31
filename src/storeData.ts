@@ -131,8 +131,12 @@ export async function editEvent(event: EventCustom){
                 eventToEdit.entry.beschreibung = event.entry.beschreibung;
                 message = 'Event edited';
             }
-            if (event.entry.location !== null && event.entry.location){
+            if (event.entry.location !== null && event.entry.location !== undefined){
                 eventToEdit.entry.location = event.entry.location;
+                message = 'Event edited';
+            }
+            if (event.entry.time !== null && event.entry.time !== undefined){
+                eventToEdit.entry.time = event.entry.time;
                 message = 'Event edited';
             }
             if (event.entry.date !== null && event.entry.date !== undefined) {
@@ -145,7 +149,6 @@ export async function editEvent(event: EventCustom){
             }
             doAudit(event.createdBy, 'edited', event.entry.eventId);
         }
-
         return (message);
     }
 }
