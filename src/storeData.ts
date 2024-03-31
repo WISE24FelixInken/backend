@@ -135,7 +135,7 @@ export async function editEvent(event: EventCustom){
                 eventToEdit.entry.location = event.entry.location;
                 message = 'Event edited';
             }
-            if (event.entry.date !== null && event.entry.price !== undefined) {
+            if (event.entry.date !== null && event.entry.date !== undefined) {
                 eventToEdit.entry.date = event.entry.date;
                 message = 'Event edited';
             }
