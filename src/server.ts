@@ -12,11 +12,27 @@ import {
     approveEvent,
     addHighlight, editEvent
 } from "./storeData";
-import {deleteEvent, deleteHighlight} from "./deleteEvent";
+import {
+    deleteEvent,
+    deleteHighlight
+} from "./deleteData";
 import cors from "cors";
 import {startUp} from "./SimulateDB/EventData";
 
+
+/**
+ * Laden der env Variablen hier nur der Port
+ */
 dotenv.config();
+
+/**
+ * Express Server Starten
+ * Port wird aus der env Variable PORT oder 3001 genommen
+ * für den Fall das keine env Variable gesetzt ist
+ *
+ * Der Server wird zum Verwenden von JSON und CORS konfiguriert
+ *
+ */
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
@@ -24,10 +40,39 @@ const port = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
 
+
+/**
+ * Server wird gestartet und gibt eine Meldung aus, auf welchem Port er läuft
+ */
 app.listen(port, ()=>{
     console.log(`[server]: Server is running at http://localhost:${port} Server My Server is running on port ${port}!`);
 });
 
+/**
+ * Der Server hat folgende Endpunkte:
+ *
+ *  GET     /v1/events/approved
+ *  GET     /v1/events/unapproved
+ *  GET     /v1/events/loadEvent
+ *  GET     /v1/events/searchEvent
+ *  POST    /v1/events/addNewEvent
+ *  DELETE  /v1/events/deleteEvent
+ *  PATCH   /v1/events/approveEvent
+ *  PUT     /v1/events/editEvent
+ *  POST    /v1/events/addHighlight
+ *  DELETE  /v1/events/deleteHighlight
+ *  POST    /v1/startup
+ *
+ */
+/**
+ *  GET     /v1/events/approved:
+ *  Gibt alle Events zurück, die bereits genehmigt wurden und sortiert sie nach dem Erstellungsdatum absteigend.
+ *  Der Request body benötigt keine Parameter
+ *  @param {Request} req
+ *  @param {Response} res
+ *  @returns {Response} response
+ *
+ */
 app.get('/v1/events/approved', async (req: Request, res: Response) => {
     try {
         const response = await getApprovedEvents();
@@ -42,6 +87,16 @@ app.get('/v1/events/approved', async (req: Request, res: Response) => {
         console.error('Fehler beim Laden und Verarbeiten der Daten:', error);
     }
 });
+
+/**
+ *  GET     /v1/events/unapproved:
+ *  Gibt alle Events zurück, die noch nicht genehmigt wurden und sortiert sie nach dem Erstellungsdatum absteigend.
+ *  Der Request body benötigt keine Parameter
+ *  @param {Request} req
+ *  @param {Response} res
+ *  @returns {Response} response
+ *
+ */
 app.get('/v1/events/unapproved', async (req: Request, res: Response) => {
     try {
         const response = await getUnapprovedEvents();
@@ -57,6 +112,17 @@ app.get('/v1/events/unapproved', async (req: Request, res: Response) => {
         console.error('Fehler beim Laden und Verarbeiten der Daten:', error);
     }
 });
+
+/**
+ *  GET     /v1/events/loadEvent:
+ *  Gibt ein spezifisches Event zurück, das anhand der Event-ID identifiziert wird.
+ *  Der Request-Body muss die Event-ID enthalten.
+ *  @param {Request} req
+ *  @param {Request.query.id} req.query.id
+ *  @param {Response} res
+ *  @returns {Response} response
+ *
+ */
 app.get('/v1/events/loadEvent', async (req: Request, res: Response) => {
     try {
         const response = await getSpecificEvent(req.query.id as string);
@@ -76,6 +142,15 @@ app.get('/v1/events/loadEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ *  POST     /v1/events/addNewEvent:
+ *  Fügt ein neues Event hinzu. Der Request-Body muss die erforderlichen Daten enthalten.
+ *  @param {Request} req
+ *  @param {Request.body} req.body
+ *  @param {Response} res
+ *  @returns {Response} response
+ *
+ */
 app.post('/v1/events/addNewEvent', async (req: Request, res: Response) => {
     try{
     const response = await addEvent(req.body);
@@ -91,6 +166,17 @@ app.post('/v1/events/addNewEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ *  GET     /v1/events/searchEvent:
+ *  Sucht nach einem Event anhand eines Suchschlüssels. Der Suchschlüssel kann in den Eigenschaften des Events enthalten sein.
+ *  Der Request-Body muss den Suchschlüssel und den Genehmigungsstatus enthalten.
+ *  @param {Request} req
+ *  @param {Request.query.searchKey} req.query.searchKey
+ *  @param {Request.query.approved} req.query.approved
+ *  @param {Response} res
+ *  @returns {Response} response
+ *
+ */
 app.get('/v1/events/searchEvent', async (req: Request, res: Response) => {
     try {
         if (req.query.searchKey === undefined) {
@@ -119,6 +205,16 @@ app.get('/v1/events/searchEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ * DELETE     /v1/events/deleteEvent:
+ * Löscht ein Event anhand der Event-ID.
+ * Der Request-Body muss die Event-ID enthalten.
+ * @param {Request} req
+ * @param {Request.query.id} req.query
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.delete('/v1/events/deleteEvent', async (req: Request, res: Response) => {
     try {
         if (req.query.id === undefined) {
@@ -139,6 +235,16 @@ app.delete('/v1/events/deleteEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ * PATCH     /v1/events/approveEvent:
+ * Genehmigt ein Event anhand der Event-ID.
+ * Der Request-Body muss die Event-ID enthalten.
+ * @param {Request} req
+ * @param {Request.query.id} req.query
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.patch('/v1/events/approveEvent', async (req: Request, res: Response) => {
 try {
         if (req.query.id === undefined) {
@@ -160,6 +266,16 @@ try {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ * PUT     /v1/events/editEvent:
+ * Bearbeitet ein Event anhand der Event-ID.
+ * Der Request-Body muss die Event-ID und die zu bearbeitenden Daten enthalten aber ausdrücklich nicht alle Daten eines Events.
+ * @param {Request} req
+ * @param {Request.body} req.body
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.put('/v1/events/editEvent', async (req: Request, res: Response) => {
     try {
         if (req.body === undefined) {
@@ -182,6 +298,16 @@ app.put('/v1/events/editEvent', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ * POST     /v1/events/addHighlight:
+ * Fügt ein Highlight zu einem Event hinzu.
+ * Der Request-Body muss die Event-ID und die Highlight-Daten enthalten.
+ * @param {Request} req
+ * @param {Request.body} req.body
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
     try {
         if (req.body === undefined) {
@@ -201,6 +327,17 @@ app.post('/v1/events/addHighlight', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+/**
+ * DELETE     /v1/events/deleteHighlight:
+ * Löscht ein Highlight aus einem Event anhand der Event-ID und der Highlight-ID.
+ * Der Request-Body muss die Event-ID und die Highlight-ID enthalten.
+ * @param {Request} req
+ * @param {Request.query.id} req.query.id
+ * @param {Request.query.highlightId} req.query.highlightId
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.delete('/v1/events/deleteHighlight', async (req: Request, res: Response) => {
     console.log('deleteHighlight');
     try {
@@ -221,7 +358,15 @@ app.delete('/v1/events/deleteHighlight', async (req: Request, res: Response) => 
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
+/**
+ * POST     /v1/startup:
+ * Füllt den Server mit Beispieldaten.
+ * Der Request-Body benötigt keine Parameter.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} response
+ *
+ */
 app.post('/v1/startup', async (req: Request, res: Response) => {
     const response = await startUp();
     res.status(200).json({ message: 'Server is filled with example Data' });

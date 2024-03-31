@@ -1,3 +1,6 @@
+/**
+ * Aufbau unserer Event-Objekte
+ */
 export interface EventCustom {
     createdOn: number;
     createdBy: string;

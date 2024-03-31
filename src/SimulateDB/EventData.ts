@@ -1,4 +1,13 @@
 import {EventList, EventCustom} from "./EventInterface";
+
+/**
+ * Beispieldaten die mit dem API-Aufruf
+ * POST     /v1/startup
+ * geladen werden
+ */
+/**
+ * @var eventList: EventList - Liste aller Events mit denen gearbeitet wird
+ */
 export let eventList: EventList;
 export let exampleEvent1: EventCustom = {
     createdOn: 1636433072,
@@ -67,12 +76,16 @@ export let exampleEvent3: EventCustom = {
         beschreibung: "Dies ist ein Beispiel Event",
         location: "Isny",
         date: "2023-03-10",
-        eventId: "d2dfe257-f53a-4507-a99e-2d2905fa63a1",
+        eventId: "7e38a3ac-1a2b-44ad-b401-bc7ba5684fea",
         price: 100,
         numberOfHighlights: 0,
     }
 }
 
+/**
+ * Funktion die die Beispieldaten in die EventList lädt
+ * POST     /v1/startup
+ */
 export async function startUp(){
     console.log('startUp', eventList);
     eventList = {

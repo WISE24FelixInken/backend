@@ -3,6 +3,18 @@ import * as fs from 'fs';
 import {eventList} from "./SimulateDB/EventData";
 import uuid4 from "uuid4";
 
+/**
+ * Fügt ein Event hinzu zur Liste der nicht genehmigten Events.
+ * Davor wird geprüft, ob das übergebene Event den Anforderungen entspricht mit der Funktion validateEvent.
+ * @param event
+ * - Das Event, das hinzugefügt werden soll und am API Endpunkt übergeben wurde.
+ * @function validateEvent
+ * - Prüft, ob das übergebene Event den Anforderungen entspricht.
+ * @function doAudit
+ * - Schreibt in die Audit-Datei, dass ein Event hinzugefügt wurde.
+ * @returns string
+ * - Gibt eine Nachricht zurück, ob das Event hinzugefügt wurde oder nicht.
+ */
 export async function addEvent(event: EventCustom){
     if (validateEvent(event)){
         const entryToAdd =  {
@@ -26,6 +38,17 @@ export async function addEvent(event: EventCustom){
     }
     return ('Object dose not match the required structure. Please check the documentation.');
 }
+
+/**
+ * Akzeptiert ein Event, das zuvor in der Liste der nicht genehmigten Events gefunden wurde.
+ * Dafür wird das Event in die Liste der genehmigten Events verschoben und aus der Liste der nicht genehmigten Events entfernt.
+ * @param eventId
+ * - Die ID des Events, das genehmigt werden soll.
+ * @function doAudit
+ * - Schreibt in die Audit-Datei, dass ein Event genehmigt wurde.
+ * @returns string
+ * - Gibt eine Nachricht zurück, ob das Event genehmigt wurde oder ob es bereits genehmigt wurde oder das es diese Event-Id nicht zuordnen kann.
+ */
 export async function approveEvent(eventId: string){
     let eventToApprove = eventList.unapprovedEvents.find(event => event.entry.eventId === eventId);
     if (eventToApprove !== undefined){
@@ -40,6 +63,18 @@ export async function approveEvent(eventId: string){
     }
     return ('Event not found');
 }
+
+/**
+ * Fügt ein Highlight zu einem Event hinzu.
+ * @param highliteData
+ * - Die Daten des Highlights, die am API Endpunkt übergeben wurden.
+ * @function validateHighlight
+ * - Prüft, ob die übergebenen Daten den Anforderungen entsprechen.
+ * @function doAudit
+ * - Schreibt in die Audit-Datei, dass ein Highlight hinzugefügt wurde.
+ * @returns string
+ * - Gibt eine Nachricht zurück, ob das Highlight hinzugefügt wurde oder ob das Event nicht gefunden wurde.
+ */
 export async function addHighlight(highliteData: any ){
     if (validateHighlight(highliteData)){
     const event = eventList.approvedEvents.find(event => event.entry.eventId === highliteData.eventId);
@@ -60,6 +95,20 @@ export async function addHighlight(highliteData: any ){
     return ('Event not found');
     }
 }
+
+/**
+ * Bearbeitet ein Event, das zuvor in der Liste der genehmigten oder nicht genehmigten Events gefunden wurde.
+ * @param event
+ * - Das Event, das bearbeitet werden soll und am API Endpunkt übergeben wurde. Es muss die ID des Events enthalten. Die anderen Felder sind optional.
+ * @params event.entry.id
+ * - Die ID des Events, das bearbeitet werden soll.
+ * @function validateToEditEvent
+ * - Prüft, ob die übergebenen Daten den Anforderungen entsprechen.
+ * @function doAudit
+ * - Schreibt in die Audit-Datei, dass ein Event bearbeitet wurde.
+ * @returns string
+ * - Gibt eine Nachricht zurück, ob das Event bearbeitet wurde oder ob es bereits genehmigt wurde oder das es diese Event-Id nicht zuordnen kann.
+ */
 export async function editEvent(event: EventCustom){
     if (validateToEditEvent(event)){
         let eventToEdit
@@ -100,10 +149,31 @@ export async function editEvent(event: EventCustom){
         return (message);
     }
 }
-//ToDo implement
-function validateToEditEvent(event: EventCustom){
-    return true
-}
+
+/**
+ * Validiert, ob die übergebenen Eventdaten den Anforderungen entsprechen ein neues Event hinzuzufügen.
+ * @param event
+ * - Das Event, das hinzugefügt werden soll und am API Endpunkt übergeben wurde.
+ * @param event.createdOn
+ * - Der Zeitstempel, wann das Event erstellt wurde.
+ * @param event.createdBy
+ * - Der Nutzername des Erstellers des Events.
+ * @param event.softwareVersion
+ * - Die Softwareversion, die zum Erstellen des Events verwendet wurde.
+ * @param event.entry.title
+ * - Der Titel des Events.
+ * @param event.entry.beschreibung
+ * - Die Beschreibung des Events.
+ * @param event.entry.location
+ * - Der Ort des Events.
+ * @param event.entry.date
+ * - Das Datum des Events.
+ * @param event.entry.price
+ * - Der Preis des Events.
+ *
+ * @returns boolean
+ * - Gibt zurück, ob die übergebenen Daten den Anforderungen entsprechen.
+ */
 function validateEvent(event: EventCustom){
     const sendedKeys = Object.keys(event);
     const sendedEntryKeys = Object.keys(event.entry);
@@ -158,12 +228,27 @@ function validateEvent(event: EventCustom){
         }
     }
 }
+
+//ToDo implement
+function validateToEditEvent(event: EventCustom){
+    return true
+}
+
 //ToDo implement
 function validateHighlight(highliteData: any){
     return true;
 }
 
-async function doAudit(createdBy: string, action: string, eventId: string) {
+/**
+ * Schreibt in die Audit-Datei, dass ein Nutzer eine Aktion durchgeführt hat.
+ * @param createdBy
+ * - Der Nutzername des Nutzers, der die Aktion durchgeführt hat.
+ * @param action
+ * - Die Aktion, die der Nutzer durchgeführt hat.
+ * @param eventId
+ * - Die ID des Events, zu dem die Aktion durchgeführt wurde.
+ */
+export async function doAudit(createdBy: string, action: string, eventId: string) {
     let text = 'Nutzer: ' +  createdBy + ' hat folgende Aktionen durchgeführt: ' + action + ' am ' + Date.now() + ' mit dem Event '+ eventId +'\n';
     fs.appendFile('src/SimulateDB/audit.txt', text, (error) => {
         if (error) throw error;
